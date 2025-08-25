@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:appwrite/appwrite.dart';
 
 class CreatePostScreen extends StatefulWidget {
+  const CreatePostScreen({Key? key}) : super(key: key);
+
   @override
   _CreatePostScreenState createState() => _CreatePostScreenState();
 }
@@ -15,20 +17,24 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final _picker = ImagePicker();
   bool _isUploading = false;
 
-  File? _imageFile;         // for mobile
-  Uint8List? _imageBytes;   // for web
+  File? _imageFile; // for mobile
+  Uint8List? _imageBytes; // for web
 
   final Client client = Client();
   late final Storage storage;
+  late final Databases databases;
 
   @override
   void initState() {
     super.initState();
     client
-        .setEndpoint('https://nyc.cloud.appwrite.io/v1') // 👈 change to your Appwrite endpoint
+        .setEndpoint(
+          'https://nyc.cloud.appwrite.io/v1',
+        ) // 👈 change to your Appwrite endpoint
         .setProject('68a714550022e0e26594')
-        .setSelfSigned(status: true);     // 👈 replace with your project ID
+        .setSelfSigned(status: true); // 👈 replace with your project ID
     storage = Storage(client);
+    databases = Databases(client);
   }
 
   Future<void> _pickImage() async {
@@ -67,22 +73,24 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
 
       final result = await storage.createFile(
-        bucketId: 'your_bucket_id', // 👈 replace with your storage bucket ID
+        bucketId:
+            '68a7196f00082654543d', // 👈 replace with your storage bucket ID
         fileId: fileId,
         file: inputFile,
       );
 
       // Return the Appwrite file ID (you can later build a URL to fetch it)
       return result.$id;
-
     } catch (e) {
-      print("Upload error: $e");
+      // print("Upload error: $e");
       return null;
     }
   }
 
   Future<void> _submitPost() async {
-    if (_postController.text.isEmpty && _imageFile == null && _imageBytes == null) {
+    if (_postController.text.isEmpty &&
+        _imageFile == null &&
+        _imageBytes == null) {
       return;
     }
 
@@ -92,23 +100,42 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
     final imageId = await _uploadImage();
 
-    // TODO: Save post data to your Appwrite database (collection: "posts")
-    // Example:
-    // await databases.createDocument(
-    //   databaseId: 'your_database_id',
-    //   collectionId: 'posts',
-    //   documentId: ID.unique(),
-    //   data: {
-    //     'content': _postController.text,
-    //     'imageId': imageId,
-    //     'timestamp': DateTime.now().toIso8601String(),
-    //   },
-    // );
+    try {
+      // Generate media URL from imageId if an image was uploaded
+      String? mediaUrl;
+      if (imageId != null) {
+        mediaUrl = 'https://nyc.cloud.appwrite.io/v1/storage/buckets/68a7196f00082654543d/files/$imageId/view';
+      }
+
+      await databases.createDocument(
+        databaseId: '68a7209e0033e67e945c', // Same database ID as home page
+        collectionId: 'posts',
+        documentId: ID.unique(),
+        data: {
+          'content': _postController.text,
+          'imageId': imageId,
+          'mediaUrl': mediaUrl,
+          'timestamp': DateTime.now().toIso8601String(),
+          'userId': 'current_user_id', // Placeholder - replace with actual user ID
+          'displayName': 'Current User', // Placeholder - replace with actual display name
+          'profileImageUrl': 'https://via.placeholder.com/150', // Placeholder
+          'likes': 0,
+          'comments': 0,
+        },
+      );
+    } catch (e) {
+      // Error handling for database operation
+      final context = this.context;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create post: $e')),
+      );
+    }
 
     setState(() {
       _isUploading = false;
     });
 
+    final context = this.context; // Store context locally
     Navigator.of(context).pop();
   }
 
@@ -141,13 +168,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             const Spacer(),
             ElevatedButton(
               onPressed: _isUploading ? null : _submitPost,
-              child: _isUploading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text("Publish Post"),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, 50),
               ),
-            )
+              child: _isUploading
+                  ? CircularProgressIndicator(color: Colors.white)
+                  : Text("Publish Post"),
+            ),
           ],
         ),
       ),

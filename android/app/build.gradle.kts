@@ -9,6 +9,10 @@ android {
     namespace = "com.example.online_parents_community"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    
+    android {
+        ndkVersion = "27.0.12077973"
+    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

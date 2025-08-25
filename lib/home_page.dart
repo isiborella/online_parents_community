@@ -5,6 +5,8 @@ import '../widgets/post_widgets.dart';
 import 'screens/create_post_screen.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -21,7 +23,7 @@ class _HomePageState extends State<HomePage> {
 
     client
         .setEndpoint('https://nyc.cloud.appwrite.io/v1')
-        .setProject('68a714550022e0e26594ID');
+        .setProject('68a714550022e0e26594');
 
     databases = Databases(client);
 
@@ -40,7 +42,7 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     } catch (e) {
-      print("Error fetching posts: $e");
+      // print("Error fetching posts: $e");
       setState(() => isLoading = false);
     }
   }

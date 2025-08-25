@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     client
         .setEndpoint(
-          'https://cloud.appwrite.io/v1',
+          'https://nyc.cloud.appwrite.io/v1',
         ) // e.g. http://localhost/v1 or https://cloud.appwrite.io/v1
         .setProject('68a714550022e0e26594')
         .setSelfSigned(status: true); // Replace with your project ID
@@ -37,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text,
       );
 
+      final context = this.context; // Store context locally
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => MainScreen()),
