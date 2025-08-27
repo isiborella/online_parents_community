@@ -1,4 +1,4 @@
-import 'dart:io' show File; // only available on mobile
+import 'dart:io' show File;
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -17,8 +17,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final _picker = ImagePicker();
   bool _isUploading = false;
 
-  File? _imageFile; // for mobile
-  Uint8List? _imageBytes; // for web
+  File? _imageFile; // Mobile
+  Uint8List? _imageBytes; // Web
 
   final Client client = Client();
   late final Storage storage;
@@ -28,11 +28,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   void initState() {
     super.initState();
     client
-        .setEndpoint(
-          'https://nyc.cloud.appwrite.io/v1',
-        ) // 👈 change to your Appwrite endpoint
+        .setEndpoint('https://nyc.cloud.appwrite.io/v1')
         .setProject('68a714550022e0e26594')
-        .setSelfSigned(status: true); // 👈 replace with your project ID
+        .setSelfSigned(status: true);
     storage = Storage(client);
     databases = Databases(client);
   }
@@ -42,20 +40,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     if (pickedFile != null) {
       if (kIsWeb) {
         final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _imageBytes = bytes;
-        });
+        setState(() => _imageBytes = bytes);
       } else {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
+        setState(() => _imageFile = File(pickedFile.path));
       }
     }
   }
 
   Future<String?> _uploadImage() async {
     if (_imageFile == null && _imageBytes == null) return null;
-
     try {
       final fileId = ID.unique();
       InputFile inputFile;
@@ -73,16 +66,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
 
       final result = await storage.createFile(
-        bucketId:
-            '68a7196f00082654543d', // 👈 replace with your storage bucket ID
+        bucketId: '68a7196f00082654543d',
         fileId: fileId,
         file: inputFile,
       );
 
-      // Return the Appwrite file ID (you can later build a URL to fetch it)
       return result.$id;
     } catch (e) {
-      // print("Upload error: $e");
       return null;
     }
   }
@@ -90,59 +80,55 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> _submitPost() async {
     if (_postController.text.isEmpty &&
         _imageFile == null &&
-        _imageBytes == null) {
+        _imageBytes == null)
       return;
-    }
 
-    setState(() {
-      _isUploading = true;
-    });
+    setState(() => _isUploading = true);
 
     final imageId = await _uploadImage();
 
     try {
-      // Generate media URL from imageId if an image was uploaded
       String? mediaUrl;
       if (imageId != null) {
-        mediaUrl = 'https://nyc.cloud.appwrite.io/v1/storage/buckets/68a7196f00082654543d/files/$imageId/view';
+        mediaUrl =
+            'https://nyc.cloud.appwrite.io/v1/storage/buckets/68a7196f00082654543d/files/$imageId/view';
       }
 
       await databases.createDocument(
-        databaseId: '68a7209e0033e67e945c', // Same database ID as home page
-        collectionId: 'posts',
+        databaseId: '68a7209e0033e67e945c',
+        collectionId: '68a7222d0036facdd548',
         documentId: ID.unique(),
         data: {
           'content': _postController.text,
           'imageId': imageId,
           'mediaUrl': mediaUrl,
           'timestamp': DateTime.now().toIso8601String(),
-          'userId': 'current_user_id', // Placeholder - replace with actual user ID
-          'displayName': 'Current User', // Placeholder - replace with actual display name
-          'profileImageUrl': 'https://via.placeholder.com/150', // Placeholder
+          'userId': 'current_user_id',
+          'displayName': 'Current User',
+          'profileImageUrl': 'https://via.placeholder.com/150',
           'likes': 0,
           'comments': 0,
         },
       );
     } catch (e) {
-      // Error handling for database operation
-      final context = this.context;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create post: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to create post: $e')));
     }
 
-    setState(() {
-      _isUploading = false;
-    });
-
-    final context = this.context; // Store context locally
+    setState(() => _isUploading = false);
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Create Post")),
+      backgroundColor: const Color(0xFF0D1B2A),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0D1B2A),
+        title: const Text("Create Post"),
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -150,30 +136,65 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             TextField(
               controller: _postController,
               maxLines: 4,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: "What's on your mind?",
-                border: OutlineInputBorder(),
+                hintStyle: TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: const Color(0xFF1B263B),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             if (kIsWeb && _imageBytes != null)
-              Image.memory(_imageBytes!, height: 150, fit: BoxFit.cover),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.memory(
+                  _imageBytes!,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
             if (!kIsWeb && _imageFile != null)
-              Image.file(_imageFile!, height: 150, fit: BoxFit.cover),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.file(_imageFile!, height: 200, fit: BoxFit.cover),
+              ),
             TextButton.icon(
               onPressed: _pickImage,
-              icon: Icon(Icons.image),
-              label: Text("Add Image"),
+              icon: const Icon(Icons.image, color: Colors.greenAccent),
+              label: const Text(
+                "Add Image",
+                style: TextStyle(color: Colors.greenAccent),
+              ),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _isUploading ? null : _submitPost,
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+                backgroundColor: Colors.greenAccent,
+                foregroundColor: Colors.black87,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
               child: _isUploading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text("Publish Post"),
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      "Publish Post",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
             ),
           ],
         ),

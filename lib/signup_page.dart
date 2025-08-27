@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
-import 'home_page.dart';
+import 'login_page.dart';
+import 'screens/main_screen.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -10,10 +11,11 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
-  // Appwrite client + account
   final Client client = Client();
   late Account account;
 
@@ -21,31 +23,36 @@ class _SignupPageState extends State<SignupPage> {
   void initState() {
     super.initState();
     client
-        .setEndpoint(
-          'https://nyc.cloud.appwrite.io/v1',
-        ) // e.g. http://localhost/v1 or https://cloud.appwrite.io/v1
-        .setProject('68a714550022e0e26594')
-        .setSelfSigned(status: true); // replace with your Appwrite project ID
+      ..setEndpoint('https://nyc.cloud.appwrite.io/v1')
+      ..setProject('68a714550022e0e26594')
+      ..setSelfSigned(status: true);
     account = Account(client);
   }
 
-  void registerUser() async {
+  void signupUser() async {
+    if (passwordController.text.trim() !=
+        confirmPasswordController.text.trim()) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Passwords do not match!")));
+      return;
+    }
+
     try {
       await account.create(
-        userId: ID.unique(), // generates a unique user ID
-        email: emailController.text,
-        password: passwordController.text,
+        userId: ID.unique(),
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      // After signup, also create session (so they’re logged in immediately)
       await account.createEmailPasswordSession(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(
@@ -57,26 +64,123 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Sign Up")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
+      backgroundColor: const Color.fromARGB(255, 45, 93, 133),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(25),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.85,
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 206, 219, 231),
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 15,
+                  offset: Offset(0, 5),
+                ),
+              ],
             ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: "Password"),
-              obscureText: true,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "🎉 Create Account",
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Join our community 💬",
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 30),
+                // Username input
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(
+                    labelText: "Username",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Email input
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Password input
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Confirm password
+                TextField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Confirm Password",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  onPressed: signupUser,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 70,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already have an account?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: registerUser,
-              child: const Text("Sign Up"),
-            ),
-          ],
+          ),
         ),
       ),
     );

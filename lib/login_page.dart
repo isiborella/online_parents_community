@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
-import 'package:online_parents_community/screens/main_screen.dart';
+import 'screens/main_screen.dart';
 import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -14,7 +14,6 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  // Appwrite Client + Account
   final Client client = Client();
   late Account account;
 
@@ -22,25 +21,26 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     client
-        .setEndpoint(
-          'https://nyc.cloud.appwrite.io/v1',
-        ) // e.g. http://localhost/v1 or https://cloud.appwrite.io/v1
-        .setProject('68a714550022e0e26594')
-        .setSelfSigned(status: true); // Replace with your project ID
+      ..setEndpoint('https://nyc.cloud.appwrite.io/v1')
+      ..setProject('68a714550022e0e26594')
+      ..setSelfSigned(status: true);
     account = Account(client);
   }
 
   void loginUser() async {
     try {
+      // Delete all previous sessions before creating a new one
+      // await account.deleteSessions();
+
       await account.createEmailPasswordSession(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      final context = this.context; // Store context locally
+      // Navigate to MainScreen after login
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(
@@ -52,47 +52,91 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          margin: const EdgeInsets.all(40),
-          padding: const EdgeInsets.all(15),
-          decoration: const BoxDecoration(
-            color: Colors.transparent,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.transparent,
-                blurRadius: 3,
-                spreadRadius: 2,
-                offset: Offset(10, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: 50),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-              TextField(
-                controller: passwordController,
-                decoration: const InputDecoration(labelText: "Password"),
-                obscureText: true,
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(onPressed: loginUser, child: const Text("Login")),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const SignupPage()),
-                  );
-                },
-                child: const Text("Don't have an account? Sign Up"),
-              ),
-            ],
+      backgroundColor: const Color.fromARGB(255, 45, 93, 133),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.85,
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 206, 219, 231),
+              borderRadius: BorderRadius.circular(25),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 15,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "👋 Welcome Back!",
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 30),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                ElevatedButton(
+                  onPressed: loginUser,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 80,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: const Text(
+                    "Login",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don’t have an account?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignupPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Sign Up",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

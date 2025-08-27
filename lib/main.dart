@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
-import 'package:online_parents_community/login_page.dart';
-import 'screens/main_screen.dart'; // Import your new MainScreen
+import 'login_page.dart';
+import 'screens/main_screen.dart';
 
-late Client client; // Appwrite client will be available globally
+late Client client; // Appwrite client globally
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Appwrite client
   client = Client()
-    ..setEndpoint('https://nyc.cloud.appwrite.io/v1') // Appwrite endpoint
-    ..setProject(
-      '68a714550022e0e26594',
-    ).setSelfSigned(status: true); // Your Appwrite project ID
+    ..setEndpoint('https://nyc.cloud.appwrite.io/v1')
+    ..setProject('68a714550022e0e26594')
+    ..setSelfSigned(status: true);
 
   runApp(const MyApp());
 }
@@ -26,11 +25,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Parent Community',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      // You can decide whether HomePage or LoginPage should be the first screen
-      home: LoginPage(),
+      home: const LoginPage(),
       routes: {
-        '/main': (context) => MainScreen(),
+        '/main': (context) => const MainScreen(),
         '/login': (context) => const LoginPage(),
       },
     );
