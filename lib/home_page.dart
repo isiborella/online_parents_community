@@ -1,6 +1,4 @@
-import 'package:appwrite/models.dart';
 import 'package:flutter/material.dart';
-import 'package:appwrite/appwrite.dart';
 import '../widgets/post_widgets.dart';
 import 'screens/create_post_screen.dart';
 import 'dart:ui';
@@ -13,133 +11,150 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final client = Client();
-  late Databases databases;
-  List<Document> posts = [];
+  List<Map<String, dynamic>> posts = [];
   bool isLoading = true;
 
-  final String databaseId = '68a7209e0033e67e945c';
-  final String postsCollectionId = '68a7222d0036facdd548';
+  // Define the new accent color
+  static const Color accentColor = Color(0xFF0A2647);
 
   @override
   void initState() {
     super.initState();
-
-    client
-        .setEndpoint('https://nyc.cloud.appwrite.io/v1')
-        .setProject('68a714550022e0e26594');
-
-    databases = Databases(client);
-
     _fetchPosts();
   }
 
   Future<void> _fetchPosts() async {
-    try {
-      final response = await databases.listDocuments(
-        databaseId: databaseId,
-        collectionId: postsCollectionId,
-        queries: [Query.orderDesc('timestamp')],
-      );
+    // Simulate a network delay
+    await Future.delayed(const Duration(milliseconds: 500));
 
-      setState(() {
-        posts = response.documents;
-        isLoading = false;
-      });
-    } catch (e) {
-      print("Error fetching posts: $e");
-      setState(() => isLoading = false);
-    }
+    // Hardcoded sample posts data
+    final samplePosts = [
+      {
+        'title': 'Welcome to the Parent Community!',
+        'content':
+            'This is a safe space for parents to share experiences, ask questions, and support each other. Feel free to post about parenting challenges, milestones, or just share your day!',
+        'userId': 'admin',
+        'timestamp': '2024-01-15T10:30:00Z',
+      },
+      {
+        'title': 'Sleep Training Tips',
+        'content':
+            'Has anyone had success with gentle sleep training methods? My 8-month-old still wakes up every 2-3 hours and I\'m exhausted. Looking for advice from experienced parents!',
+        'userId': 'parent123',
+        'timestamp': '2024-01-14T15:45:00Z',
+      },
+      {
+        'title': 'Healthy Snack Ideas for Toddlers',
+        'content':
+            'My 2-year-old is getting picky with food. What are some healthy, easy-to-make snacks that your toddlers actually enjoy eating?',
+        'userId': 'mom_of_two',
+        'timestamp': '2024-01-13T09:15:00Z',
+      },
+      {
+        'title': 'Dealing with Screen Time',
+        'content':
+            'How do you manage screen time for your kids? I\'m trying to find a balance between educational content and limiting overall screen exposure.',
+        'userId': 'tech_parent',
+        'timestamp': '2024-01-12T14:20:00Z',
+      },
+      {
+        'title': 'First Day of School Tips',
+        'content':
+            'My little one is starting kindergarten next week! Any advice for making the transition smoother? Both of us are a bit nervous about this big step.',
+        'userId': 'new_school_mom',
+        'timestamp': '2024-01-11T11:00:00Z',
+      },
+    ];
+
+    setState(() {
+      posts = samplePosts;
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text(
-          'Parent Community 💬',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
       body: Container(
-        color: const Color.fromARGB(
-          255,
-          13,
-          0,
-          24,
-        ), // Deep purple/almost black background
+        color: const Color(0xFFF5F7FA), // Soft gray background
         child: isLoading
             ? const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: CircularProgressIndicator(
+                  color: accentColor,
+                ), // Updated color
               )
-            : posts.isEmpty
-            ? const Center(
-                child: Text(
-                  'No posts yet.\nBe the first to share something 💡',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  final data = post.data;
-
-                  final title = data['title'] ?? 'Untitled';
-                  final content = data['content'] ?? 'No content available';
-                  final author = data['userId'] ?? 'Anonymous';
-                  final time = data['timestamp'] ?? '';
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.25),
-                              width: 1,
+            : CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    backgroundColor: Colors.white,
+                    floating: true,
+                    pinned: true,
+                    expandedHeight: 80.0, // Fixed height for a clean look
+                    title: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          const CircleAvatar(
+                            radius: 20,
+                            backgroundImage: NetworkImage(
+                              'https://via.placeholder.com/150',
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Container(
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFFF5F7FA,
+                                ), // Matches the body background
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                            ],
+                              child: const TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Search...',
+                                  hintStyle: TextStyle(
+                                    color: Color(0xFFB0BEC5),
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: Color(0xFFB0BEC5),
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: 10.0,
+                                    horizontal: 16.0,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                          child: PostWidget(
-                            post: {
-                              'title': title,
-                              'content': content,
-                              'userId': author,
-                              'timestamp': time,
-                            },
-                          ),
-                        ),
+                        ],
                       ),
                     ),
-                  );
-                },
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((
+                      BuildContext context,
+                      int index,
+                    ) {
+                      final post = posts[index];
+                      return PostWidget(
+                        post: {
+                          'title': post['title'] ?? 'Untitled',
+                          'content': post['content'] ?? 'No content available',
+                          'userId': post['userId'] ?? 'Anonymous',
+                          'timestamp': post['timestamp'] ?? '',
+                        },
+                      );
+                    }, childCount: posts.length),
+                  ),
+                ],
               ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white.withOpacity(0.2),
+        backgroundColor: accentColor, // Updated color
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),

@@ -64,7 +64,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 45, 93, 133),
+      backgroundColor: Colors.grey[100],
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(25),
@@ -72,11 +72,11 @@ class _SignupPageState extends State<SignupPage> {
             width: MediaQuery.of(context).size.width * 0.85,
             padding: const EdgeInsets.all(25),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 206, 219, 231),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(25),
               boxShadow: const [
                 BoxShadow(
-                  color: Colors.black26,
+                  color: Colors.black12,
                   blurRadius: 15,
                   offset: Offset(0, 5),
                 ),

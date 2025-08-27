@@ -3,7 +3,10 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:appwrite/appwrite.dart';
+
+// Appwrite imports are now commented out
+// import 'package:appwrite/appwrite.dart';
+// import 'package:appwrite/models.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({Key? key}) : super(key: key);
@@ -20,19 +23,30 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   File? _imageFile; // Mobile
   Uint8List? _imageBytes; // Web
 
-  final Client client = Client();
-  late final Storage storage;
-  late final Databases databases;
+  // Appwrite clients are now commented out
+  // final Client client = Client();
+  // late final Storage storage;
+  // late final Databases databases;
+
+  static const Color accentColor = Color(0xFF0A2647);
+  static const Color lightBackground = Color(0xFFF5F7FA);
 
   @override
   void initState() {
     super.initState();
-    client
-        .setEndpoint('https://nyc.cloud.appwrite.io/v1')
-        .setProject('68a714550022e0e26594')
-        .setSelfSigned(status: true);
-    storage = Storage(client);
-    databases = Databases(client);
+    // Appwrite client initialization is now commented out
+    // client
+    //     .setEndpoint('https://nyc.cloud.appwrite.io/v1')
+    //     .setProject('YOUR_PROJECT_ID')
+    //     .setSelfSigned(status: true);
+    // storage = Storage(client);
+    // databases = Databases(client);
+  }
+
+  @override
+  void dispose() {
+    _postController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImage() async {
@@ -47,6 +61,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     }
   }
 
+  // Appwrite image upload logic is now commented out
+  /*
   Future<String?> _uploadImage() async {
     if (_imageFile == null && _imageBytes == null) return null;
     try {
@@ -66,37 +82,46 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       }
 
       final result = await storage.createFile(
-        bucketId: '68a7196f00082654543d',
+        bucketId: 'YOUR_BUCKET_ID',
         fileId: fileId,
         file: inputFile,
       );
-
       return result.$id;
     } catch (e) {
       return null;
     }
   }
+  */
 
   Future<void> _submitPost() async {
     if (_postController.text.isEmpty &&
         _imageFile == null &&
-        _imageBytes == null)
+        _imageBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please add content or an image to your post.'),
+        ),
+      );
       return;
+    }
 
     setState(() => _isUploading = true);
 
-    final imageId = await _uploadImage();
+    // This section now simulates a network call for 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
 
+    // Appwrite document creation is now commented out
+    /*
+    final imageId = await _uploadImage();
     try {
       String? mediaUrl;
       if (imageId != null) {
-        mediaUrl =
-            'https://nyc.cloud.appwrite.io/v1/storage/buckets/68a7196f00082654543d/files/$imageId/view';
+        mediaUrl = 'https://your.endpoint.com/v1/storage/buckets/YOUR_BUCKET_ID/files/$imageId/view';
       }
 
       await databases.createDocument(
-        databaseId: '68a7209e0033e67e945c',
-        collectionId: '68a7222d0036facdd548',
+        databaseId: 'YOUR_DATABASE_ID',
+        collectionId: 'YOUR_COLLECTION_ID',
         documentId: ID.unique(),
         data: {
           'content': _postController.text,
@@ -110,24 +135,41 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           'comments': 0,
         },
       );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Post created successfully!')),
+      );
+
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create post: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create post: $e')),
+      );
     }
+    */
+
+    // UI feedback for success
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Post created successfully!')));
 
     setState(() => _isUploading = false);
-    Navigator.of(context).pop();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: lightBackground,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1B2A),
-        title: const Text("Create Post"),
+        title: const Text(
+          "Create Post",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        backgroundColor: accentColor,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -136,12 +178,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             TextField(
               controller: _postController,
               maxLines: 4,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.black87),
               decoration: InputDecoration(
                 hintText: "What's on your mind?",
-                hintStyle: TextStyle(color: Colors.white70),
+                hintStyle: const TextStyle(color: Colors.black54),
                 filled: true,
-                fillColor: const Color(0xFF1B263B),
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide.none,
@@ -169,18 +211,18 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             TextButton.icon(
               onPressed: _pickImage,
-              icon: const Icon(Icons.image, color: Colors.greenAccent),
+              icon: const Icon(Icons.image, color: accentColor),
               label: const Text(
                 "Add Image",
-                style: TextStyle(color: Colors.greenAccent),
+                style: TextStyle(color: accentColor),
               ),
             ),
             const Spacer(),
             ElevatedButton(
               onPressed: _isUploading ? null : _submitPost,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.greenAccent,
-                foregroundColor: Colors.black87,
+                backgroundColor: accentColor,
+                foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),

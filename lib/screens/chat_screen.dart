@@ -97,38 +97,18 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void _sendAudio() {
-    setState(() {
-      messages.add({
-        'text': '🎤 Audio message',
-        'isMe': true,
-        'time': DateFormat.jm().format(DateTime.now()),
-        'seen': false,
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: const Color(0xFFF5F7FA), // This is the background color
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1B2A),
+        backgroundColor: Colors.white,
         elevation: 0,
         title: Row(
           children: [
-            // Back button
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(width: 4),
-            // Avatar
             CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.blue[400],
+              radius: 20,
+              backgroundColor: const Color(0xFF00BFA5), // Accent color
               child: Text(
                 widget.chatName[0],
                 style: const TextStyle(
@@ -144,6 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xFF212121),
                 ),
               ),
             ),
@@ -151,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert, color: Colors.grey),
             onPressed: () {
               // Options menu
             },
@@ -163,7 +144,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Expanded(
             child: ListView.builder(
               reverse: true,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final msg = messages[messages.length - 1 - index];
@@ -171,69 +152,53 @@ class _ChatScreenState extends State<ChatScreen> {
                   alignment: msg['isMe']
                       ? Alignment.centerRight
                       : Alignment.centerLeft,
-                  child: GestureDetector(
-                    onLongPress: () {
-                      // Optional: swipe to reply / copy
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 14,
-                      ),
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.75,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: msg['isMe']
-                            ? const LinearGradient(
-                                colors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              )
-                            : const LinearGradient(
-                                colors: [Color(0xFF37474F), Color(0xFF263238)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(16),
-                          topRight: const Radius.circular(16),
-                          bottomLeft: Radius.circular(msg['isMe'] ? 16 : 0),
-                          bottomRight: Radius.circular(msg['isMe'] ? 0 : 16),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 14,
+                    ),
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.75,
+                    ),
+                    decoration: BoxDecoration(
+                      color: msg['isMe']
+                          ? const Color(0xFF00BFA5)
+                          : const Color(0xFF424242),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          msg['text'],
+                          style: const TextStyle(color: Colors.white),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            msg['text'],
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                msg['time'],
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 10,
-                                ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              msg['time'],
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 10,
                               ),
+                            ),
+                            if (msg['isMe']) ...[
                               const SizedBox(width: 4),
-                              if (msg['isMe'])
-                                Icon(
-                                  msg['seen'] ? Icons.done_all : Icons.done,
-                                  size: 14,
-                                  color: msg['seen']
-                                      ? Colors.blueAccent
-                                      : Colors.white54,
-                                ),
+                              Icon(
+                                msg['seen'] ? Icons.done_all : Icons.done,
+                                size: 14,
+                                color: msg['seen']
+                                    ? Colors.white
+                                    : Colors.white54,
+                              ),
                             ],
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -241,38 +206,36 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-            color: const Color(0xFF1B263B),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+            color: Colors.white,
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.mic, color: Colors.greenAccent),
-                  onPressed: _sendAudio,
-                ),
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Message...",
-                      hintStyle: const TextStyle(color: Colors.white54),
-                      filled: true,
-                      fillColor: const Color(0xFF0D1B2A),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(
+                        0xFFF5F7FA,
+                      ), // Matches screen background
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      style: const TextStyle(color: Color(0xFF212121)),
+                      decoration: const InputDecoration(
+                        hintText: "Message...",
+                        hintStyle: TextStyle(color: Color(0xFFB0BEC5)),
+                        border: InputBorder.none,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.greenAccent),
+                FloatingActionButton(
                   onPressed: _sendMessage,
+                  mini: true,
+                  backgroundColor: const Color(0xFF00BFA5),
+                  child: const Icon(Icons.send, color: Colors.white),
                 ),
               ],
             ),
